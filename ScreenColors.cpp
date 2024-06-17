@@ -1,21 +1,14 @@
 #include "Windows.h"
 #include "stdio.h"
-#include "wininet.h"
-#include "Shobjidl.h"
-#include "shlobj_core.h"
-#include "shlwapi.h"
-#include "shellapi.h"
 #include "magnification.h"
-#pragma comment(lib, "Ole32.lib")
 #pragma comment(lib, "User32.lib")
 #pragma comment(lib, "Shell32.lib")
-#pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib, "Magnification.lib")
 #include "assert.h"
 
 #define ArrayCount(x) (sizeof((x)) / sizeof((x)[0]))
 
-#define ScreenColorsName L"Screen Colors"
+#define ScreenColorsName "Screen Colors"
 #define WM_ScreenColors_ShowTray (WM_USER + 1)
 
 struct ColorMap {
@@ -47,14 +40,14 @@ static void ChangeColor(unsigned color_index) {
 }
 
 static void AddTrayIcon(HWND window, HICON icon) {
-    NOTIFYICONDATAW data = {};
+    NOTIFYICONDATAA data = {};
     data.cbSize = sizeof(data);
     data.hWnd = window,
     data.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP,
     data.uCallbackMessage = WM_ScreenColors_ShowTray,
     data.hIcon = icon,
-    StrCpyNW(data.szTip, ScreenColorsName, ARRAYSIZE(data.szTip));
-    assert(Shell_NotifyIconW(NIM_ADD, &data));
+    strncpy(data.szTip, ScreenColorsName, sizeof(data.szTip));
+    assert(Shell_NotifyIconA(NIM_ADD, &data));
 }
 
 static void ShowTrayMenu(HWND window) {
@@ -118,20 +111,19 @@ static LRESULT WinMessageCallback(HWND window, UINT message, WPARAM wParam, LPAR
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
     App.icon = LoadIconW(GetModuleHandleW(0), MAKEINTRESOURCEW(1));
 
-    HRESULT co_init_result = CoInitialize(nullptr); // @todo delete
     MagInitialize();
 
 #define WINDOW_CLASS ScreenColorsName
-    WNDCLASSW window_class = {};
+    WNDCLASSA window_class = {};
     window_class.style = 0;
     window_class.lpfnWndProc = WinMessageCallback;
     window_class.hInstance = hInstance;
     window_class.hIcon = App.icon;
     window_class.lpszClassName = WINDOW_CLASS;
-    ATOM atom = RegisterClassW(&window_class);
+    ATOM atom = RegisterClassA(&window_class);
 
     DWORD style = WS_OVERLAPPEDWINDOW;
-    HWND window = CreateWindowW(WINDOW_CLASS, ScreenColorsName, style,
+    HWND window = CreateWindowA(WINDOW_CLASS, ScreenColorsName, style,
                                 CW_USEDEFAULT, CW_USEDEFAULT,
                                 400, 400,
                                 0, 0, hInstance, 0);
@@ -235,7 +227,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         1.0f,  0.0f,  0.0f,  0.0f,  1.0f
     });
 
-
     while (true) {
         MSG msg;
         GetMessageW(&msg, 0, 0, 0);
@@ -243,8 +234,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         DispatchMessageW(&msg);
     }
 
-    MagUninitialize();
-    CoUninitialize(); // @todo delete
     MagUninitialize();
     return 0;
 }
