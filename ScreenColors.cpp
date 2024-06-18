@@ -201,7 +201,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
     AddColorMap("Shift left", {
         0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
         1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-        0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+        0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
         0.0f,  0.0f,  0.0f,  1.0f,  0.0f,
         0.0f,  0.0f,  0.0f,  0.0f,  1.0f
     });
